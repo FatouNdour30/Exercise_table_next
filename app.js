@@ -1,71 +1,102 @@
 const students = [];
-const resultsDiv = document.getElementById("results");
+            const resultsDiv = document.getElementById("results");
 
-function displayStudent(student) {
-    const tableBody = document.getElementById("studentsTable");
-    const row = tableBody.insertRow();
-    student.forEach(data => {
-        const cell = row.insertCell();
-        cell.textContent = data;
-    });
-}
+            function displayStudent(student) {
+                const tableBody = document.getElementById("studentsTable");
+                const row = tableBody.insertRow();
+                student.forEach(data => {
+                    const cell = row.insertCell();
+                    cell.textContent = data;
+                });
+            }
 
-function addStudent() {
-    const id = prompt("Entrez l'ID de l'élève");
-    const nom = prompt("Entrez le nom de l'élève");
-    const prenom = prompt("Entrez le prénom de l'élève");
-    const statut = prompt("Entrez le statut de l'élève (Présent ou Absent)");
-    const age = prompt("Entrez l'âge de l'élève");
-    const note = prompt("Entrez la note de l'élève");
+            function addStudent() {
+                const id = document.getElementById("studentId").value;
+                const nom = document.getElementById("studentNom").value;
+                const prenom = document.getElementById("studentPrenom").value;
+                const statut = document.getElementById("studentStatut").value;
+                const age = document.getElementById("studentAge").value;
+                const note = document.getElementById("studentNote").value;
 
-    const student = [id, nom, prenom, statut, age, note];
-    students.push(student);
+                const student = [id, nom, prenom, statut, age, note];
+                students.push(student);
 
-    displayStudent(student);
-}
+                displayStudent(student);
+                displayResults();
+            }
 
-const addButton = document.createElement("button");
-addButton.textContent = "Ajouter un élève";
-addButton.className = "btn btn-primary";
-addButton.addEventListener("click", addStudent);
-document.body.appendChild(addButton);
+            const form = document.createElement("form");
+            form.innerHTML = `
+                <label>ID de l'élève:</label>
+                <input type="text" id="studentId"><br>
 
-function filterStudents(predicate) {
-    return students.filter(student => predicate(student));
-}
+                <label>Nom de l'élève:</label>
+                <input type="text" id="studentNom"><br>
 
-function displayStudents(title, filteredStudents, format) {
-    resultsDiv.innerHTML += `<h2>${title} (${filteredStudents.length}) :</h2>`;
-    if (filteredStudents.length === 0) {
-        resultsDiv.innerHTML += "<p>Aucun élève trouvé.</p>";
-    } else {
-        const list = document.createElement("ul");
-        filteredStudents.forEach(student => {
-            const listItem = document.createElement("li");
-            listItem.textContent = format(student);
-            list.appendChild(listItem);
-        });
-        resultsDiv.appendChild(list);
-    }
-}
+                <label>Prénom de l'élève:</label>
+                <input type="text" id="studentPrenom"><br>
 
-function formatStudent(student) {
-    return `${student[1]} ${student[2]} (${student[5]})`;
-}
+                <label>Statut de l'élève (Présent ou Absent):</label>
+                <input type="text" id="studentStatut"><br>
 
-function formatStudentWithoutAge(student) {
-    return `${student[1]} ${student[2]}`;
-}
+                <label>Âge de l'élève:</label>
+                <input type="text" id="studentAge"><br>
 
-function displayResults() {
-    resultsDiv.innerHTML = ""; // Efface le contenu précédent
+                <label>Note de l'élève:</label>
+                <input type="text" id="studentNote"><br>
 
-    const studentsWithoutAge = filterStudents(student => student[4] === "");
-    displayStudents("Liste des élèves sans âge", studentsWithoutAge, formatStudentWithoutAge);
+                <button type="button" class="btn btn-primary" onclick="addStudent()">Ajouter un élève</button>
+            `;
+            document.body.appendChild(form);
 
-    const presentStudents = filterStudents(student => student[3].toLowerCase() === "présent");
-    displayStudents("Liste des élèves présents", presentStudents, formatStudent);
+            function filterStudents(predicate) {
+                return students.filter(student => predicate(student));
+            }
 
-    const highNoteStudents = filterStudents(student => parseFloat(student[5]) >= 10);
-    displayStudents("Liste des élèves avec note >= 10", highNoteStudents, formatStudent);
-}
+            function displayStudents(title, filteredStudents, format) {
+                const studentsList = document.createElement("div");
+                studentsList.innerHTML += `<h2>${title} (${filteredStudents.length}) :</h2>`;
+                if (filteredStudents.length === 0) {
+                    studentsList.innerHTML += "<p>Aucun élève trouvé.</p>";
+                } else {
+                    const list = document.createElement("ul");
+                    filteredStudents.forEach(student => {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = format(student);
+                        list.appendChild(listItem);
+                    });
+                    studentsList.appendChild(list);
+                }
+                resultsDiv.appendChild(studentsList);
+            }
+
+            function formatStudent(student) {
+                return `${student[1]} ${student[2]} (${student[5]})`;
+            }
+
+            function formatStudentWithoutAge(student) {
+                return `${student[1]} ${student[2]}`;
+            }
+
+            function displayResults() {
+                resultsDiv.innerHTML = ""; // Efface le contenu précédent
+
+                // Afficher l'élève avec la plus grande note
+                const studentWithMaxNote = students.reduce((max, student) => (parseFloat(student[5]) > parseFloat(max[5]) ? student : max), students[0]);
+                const maxNoteDiv = document.createElement("div");
+                maxNoteDiv.innerHTML += `<h2>Élève avec la plus grande note :</h2>`;
+                maxNoteDiv.innerHTML += `<p>${formatStudent(studentWithMaxNote)}</p>`;
+                resultsDiv.appendChild(maxNoteDiv);
+
+                const studentsWithoutAge = filterStudents(student => student[4] === "");
+                displayStudents("Liste des élèves sans âge", studentsWithoutAge, formatStudentWithoutAge);
+
+                const presentStudents = filterStudents(student => student[3].toLowerCase() === "présent");
+                displayStudents("Liste des élèves présents", presentStudents, formatStudent);
+
+                const highNoteStudents = filterStudents(student => parseFloat(student[5]) >= 10);
+                displayStudents("Liste des élèves avec note >= 10", highNoteStudents, formatStudent);
+            }
+
+            // Appeler la fonction pour afficher les résultats
+            displayResults();
